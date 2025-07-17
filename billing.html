@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BillPro - Complete Billing System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #2d3748;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .user-info {
+            display: none;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logout-btn {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #c53030;
+            transform: translateY(-2px);
+        }
+
+        /* Page Sections */
+        .page {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .page::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+            background-size: 200% 100%;
+            animation: gradientShift 3s ease-in-out infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        h1, h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2d3748;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+
+        h2 {
+            font-size: 2em;
+            font-weight: 600;
+        }
+
+        /* Login Form */
+        .login-form {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+            color: #2d3748;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Product Grid */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .product-card {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .product-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea20, #764ba220);
+        }
+
+        .product-emoji {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+
+        .product-name {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+
+        .product-price {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .product-description {
+            color: #718096;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .quantity-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quantity-btn:hover {
+            background: #5a67d8;
+            transform: scale(1.1);
+        }
+
+        .quantity-display {
+            font-size: 1.2em;
+            font-weight: 600;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        /* Cart */
+        .cart-summary {
+            background: #f0f7ff;
+            border: 2px solid #bee3f8;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #cbd5e0;
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .cart-total {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #667eea;
+            text-align: right;
+            margin-top: 15px;
+        }
+
+        /* Bill Display */
+        .bill-container {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .bill-header {
+            text-align: center;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .bill-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f7fafc;
+        }
+
+        .bill-total {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #667eea;
+            border-top: 2px solid #e2e8f0;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+
+        /* Navigation */
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .nav-btn {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.secondary {
+            background: #718096;
+        }
+
+        .nav-btn.secondary:hover {
+            background: #4a5568;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .progress-step {
+            display: flex;
+            align-items: center;
+            color: #a0aec0;
+            font-weight: 500;
+        }
+
+        .progress-step.active {
+            color: #667eea;
+        }
+
+        .progress-step.completed {
+            color: #48bb78;
+        }
+
+        .step-number {
+            background: #e2e8f0;
+            color: #718096;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-weight: 600;
+        }
+
+        .progress-step.active .step-number {
+            background: #667eea;
+            color: white;
+        }
+
+        .progress-step.completed .step-number {
+            background: #48bb78;
+            color: white;
+        }
+
+        .progress-line {
+            width: 100px;
+            height: 2px;
+            background: #e2e8f0;
+            margin: 0 20px;
+            position: relative;
+            top: -1px;
+        }
+
+        .progress-line.completed {
+            background: #48bb78;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .nav-buttons {
+                flex-direction: column;
+            }
+            
+            .progress-bar {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .progress-line {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">🏪 BillPro</div>
+            <div class="user-info">
+                <span>Welcome, <strong id="username-display"></strong></span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-step active" id="step1">
+                <div class="step-number">1</div>
+                <span>Login</span>
+            </div>
+            <div class="progress-line" id="line1"></div>
+            <div class="progress-step" id="step2">
+                <div class="step-number">2</div>
+                <span>Select Products</span>
+            </div>
+            <div class="progress-line" id="line2"></div>
+            <div class="progress-step" id="step3">
+                <div class="step-number">3</div>
+                <span>Generate Bill</span>
+            </div>
+        </div>
+
+        <!-- Login Page -->
+        <div class="page active" id="login-page">
+            <h1>🔐 Login to BillPro</h1>
+            <form class="login-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="username">👤 Username</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">🔒 Password</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn">Login</button>
+            </form>
+        </div>
+
+        <!-- Product Selection Page -->
+        <div class="page" id="products-page">
+            <h1>🛍️ Select Products</h1>
+            <div class="product-grid" id="product-grid">
+                <!-- Products will be populated by JavaScript -->
+            </div>
+            <div class="cart-summary">
+                <h3>🛒 Cart Summary</h3>
+                <div id="cart-items"></div>
+                <div class="cart-total" id="cart-total">Total: ₹0</div>
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-btn secondary" onclick="goBack()">← Back</button>
+                <button class="nav-btn" onclick="proceedToBill()" id="proceed-btn" disabled>Proceed to Bill →</button>
+            </div>
+        </div>
+
+        <!-- Bill Generation Page -->
+        <div class="page" id="bill-page">
+            <h1>📋 Generate Bill</h1>
+            <form action="http://localhost:5000/generate_bill" method="post" onsubmit="prepareBillData(event)"><form action="http://localhost:5000/generate_bill" method="post">
+            <div class="form-group">
+                <label for="customer_name">👤 Customer Name</label>
+                <input type="text" id="customer_name" name="customer_name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="product_id">🏷️ Product ID</label>
+                <input type="number" id="product_id" name="product_id" required>
+            </div>
+
+            <div class="form-group">
+                <label for="quantity">📦 Quantity</label>
+                <input type="number" id="quantity" name="quantity" required min="1">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="discount">💸 Discount (%)</label>
+                    <input type="number" id="discount" name="discount" value="0" min="0" max="100">
+                </div>
+
+                <div class="form-group">
+                    <label for="tax">🧾 Tax (%)</label>
+                    <input type="number" id="tax" name="tax" value="0" min="0" max="100">
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">
+                <span class="icon">⚡</span>
+                Generate Bill
+            </button>
+        </form></form>
+
+            <div class="bill-container" id="bill-display" style="display: none;">
+                <div class="bill-header">
+                    <h2>🧾 INVOICE</h2>
+                    <p>BillPro Billing System</p>
+                    <p>Date: <span id="bill-date"></span></p>
+                    <p>Customer: <span id="bill-customer"></span></p>
+                </div>
+                <div id="bill-items"></div>
+                <div class="bill-total" id="bill-final-total"></div>
+                <div class="nav-buttons">
+                    <button class="nav-btn" onclick="window.print()">🖨️ Print Bill</button>
+                    <button class="nav-btn secondary" onclick="resetSystem()">🔄 New Bill</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample products data
+        const products = [
+            { id: 1, name: "Laptop", price: 75000, emoji: "💻", description: "High-performance laptop for work and gaming" },
+            { id: 2, name: "Smartphone", price: 45000, emoji: "📱", description: "Latest flagship smartphone with amazing features" },
+            { id: 3, name: "Headphones", price: 8500, emoji: "🎧", description: "Noise-cancelling wireless headphones" },
+            { id: 4, name: "Watch", price: 25000, emoji: "⌚", description: "Smart watch with fitness tracking" },
+            { id: 5, name: "Tablet", price: 35000, emoji: "📱", description: "Powerful tablet for productivity and entertainment" },
+            { id: 6, name: "Camera", price: 65000, emoji: "📷", description: "Professional DSLR camera with lens kit" }
+        ];
+
+        let currentUser = null;
+        let cart = [];
+        let currentStep = 1;
+
+        // Initialize the application
+        function init() {
+            renderProducts();
+            updateCart();
+        }
+
+        // Handle login
+        function handleLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Simple validation (in real app, this would be server-side)
+            if (username && password) {
+                currentUser = username;
+                document.getElementById('username-display').textContent = username;
+                document.querySelector('.user-info').style.display = 'flex';
+                showPage('products-page');
+                updateProgress(2);
+            }
+        }
+
+        // Show specific page
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        // Update progress bar
+        function updateProgress(step) {
+            currentStep = step;
+            
+            // Reset all steps
+            document.querySelectorAll('.progress-step').forEach((step, index) => {
+                step.classList.remove('active', 'completed');
+                if (index < currentStep - 1) {
+                    step.classList.add('completed');
+                } else if (index === currentStep - 1) {
+                    step.classList.add('active');
+                }
+            });
+            
+            // Update progress lines
+            document.querySelectorAll('.progress-line').forEach((line, index) => {
+                line.classList.remove('completed');
+                if (index < currentStep - 1) {
+                    line.classList.add('completed');
+                }
+            });
+        }
+
+        // Render products
+        function renderProducts() {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = '';
+            
+            products.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <div class="product-emoji">${product.emoji}</div>
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-price">₹${product.price.toLocaleString('en-IN')}</div>
+                    <div class="product-description">${product.description}</div>
+                    <div class="quantity-control">
+                        <button class="quantity-btn" onclick="changeQuantity(${product.id}, -1)">-</button>
+                        <span class="quantity-display" id="qty-${product.id}">0</span>
+                        <button class="quantity-btn" onclick="changeQuantity(${product.id}, 1)">+</button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Change product quantity
+        function changeQuantity(productId, change) {
+            const product = products.find(p => p.id === productId);
+            let cartItem = cart.find(item => item.id === productId);
+            
+            if (!cartItem) {
+                cartItem = { ...product, quantity: 0 };
+                cart.push(cartItem);
+            }
+            
+            cartItem.quantity += change;
+            
+            if (cartItem.quantity <= 0) {
+                cart = cart.filter(item => item.id !== productId);
+                cartItem.quantity = 0;
+            }
+            
+            document.getElementById(`qty-${productId}`).textContent = cartItem.quantity;
+            updateCart();
+            updateProductCard(productId);
+        }
+
+        // Update product card appearance
+        function updateProductCard(productId) {
+            const card = document.querySelector(`#product-grid .product-card:nth-child(${productId})`);
+            const quantity = cart.find(item => item.id === productId)?.quantity || 0;
+            
+            if (quantity > 0) {
+                card.classList.add('selected');
+            } else {
+                card.classList.remove('selected');
+            }
+        }
+
+        // Update cart display
+        function updateCart() {
+            const cartItems = document.getElementById('cart-items');
+            const cartTotal = document.getElementById('cart-total');
+            const proceedBtn = document.getElementById('proceed-btn');
+            
+            cartItems.innerHTML = '';
+            let total = 0;
+            
+            cart.forEach(item => {
+                if (item.quantity > 0) {
+                    const itemTotal = item.price * item.quantity;
+                    total += itemTotal;
+                    
+                    const cartItem = document.createElement('div');
+                    cartItem.className = 'cart-item';
+                    cartItem.innerHTML = `
+                        <span>${item.emoji} ${item.name} x${item.quantity}</span>
+                        <span>₹${itemTotal.toLocaleString('en-IN')}</span>
+                    `;
+                    cartItems.appendChild(cartItem);
+                }
+            });
+            
+            cartTotal.textContent = `Total: ₹${total.toLocaleString('en-IN')}`;
+            proceedBtn.disabled = cart.length === 0;
+        }
+
+        // Proceed to bill
+        function proceedToBill() {
+            if (cart.length > 0) {
+                showPage('bill-page');
+                updateProgress(3);
+            }
+        }
+
+        // Prepare bill data for submission to localhost
+        function prepareBillData(event) {
+            // Calculate totals
+            let subtotal = 0;
+            const cartData = [];
+            
+            cart.forEach(item => {
+                if (item.quantity > 0) {
+                    const itemTotal = item.price * item.quantity;
+                    subtotal += itemTotal;
+                    cartData.push({
+                        product_id: item.id,
+                        name: item.name,
+                        price: item.price,
+                        quantity: item.quantity,
+                        total: itemTotal
+                    });
+                }
+            });
+            
+            const discount = parseFloat(document.getElementById('discount').value) || 0;
+            const tax = parseFloat(document.getElementById('tax').value) || 0;
+            
+            const discountAmount = subtotal * (discount / 100);
+            const taxableAmount = subtotal - discountAmount;
+            const taxAmount = taxableAmount * (tax / 100);
+            const finalTotal = taxableAmount + taxAmount;
+            
+            // Set hidden field values
+            document.getElementById('cart_data').value = JSON.stringify(cartData);
+            document.getElementById('subtotal').value = subtotal;
+            document.getElementById('total_amount').value = finalTotal;
+            
+            // Show loading state
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<span>⏳</span> Generating Bill...';
+            submitBtn.disabled = true;
+            
+            // The form will now submit to localhost:5000/generate_bill
+        }
+
+        // Go back to previous page
+        function goBack() {
+            if (currentStep === 3) {
+                showPage('products-page');
+                updateProgress(2);
+            } else if (currentStep === 2) {
+                showPage('login-page');
+                updateProgress(1);
+            }
+        }
+
+        // Logout
+        function logout() {
+            currentUser = null;
+            cart = [];
+            document.querySelector('.user-info').style.display = 'none';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('bill-display').style.display = 'none';
+            showPage('login-page');
+            updateProgress(1);
+            renderProducts();
+            updateCart();
+        }
+
+        // Reset system for new bill
+        function resetSystem() {
+            cart = [];
+            document.getElementById('customer_name').value = '';
+            document.getElementById('discount').value = '0';
+            document.getElementById('tax').value = '18';
+            document.getElementById('bill-display').style.display = 'none';
+            showPage('products-page');
+            updateProgress(2);
+            renderProducts();
+            updateCart();
+            
+            // Reset submit button
+            const submitBtn = document.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = 'Generate Bill';
+            submitBtn.disabled = false;
+        }
+
+        // Initialize app
+        init();
+    </script>
+</body>
+</html>
